@@ -1,17 +1,22 @@
 import json
-from django.http import JsonResponse
+from django.forms.models import model_to_dict
+# from django.http import JsonResponse
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from products.models import Product
+from products.serializers import ProductSerializer
 
 
-def api_home(request):
-    model_data = Product.objects.all().order_by("?").first()
-    data = {}
-
-    if model_data:
-        data['id'] = model_data.id
-        data['title'] = model_data.title
-        data['content'] = model_data.content
-        data['price'] = model_data.price
-
-    return JsonResponse(data)
+@api_view(["POST"])
+def api_home(request, *args, **kwargs):
+    serializer = ProductSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        # instance = serializer.save()
+        print(serializer.data)
+        return Response(serializer.data)
+    return Response({
+        "status": "fail",
+        "message": "Data invalid."
+    }, status=400)
