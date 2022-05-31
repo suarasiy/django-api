@@ -1,49 +1,53 @@
 from ast import arg
-from rest_framework import generics, mixins
+from rest_framework import authentication, generics, mixins, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Product
 from .serializers import ProductSerializer
 
-
-class ProductMixinView(
-        mixins.CreateModelMixin,
-        mixins.ListModelMixin,
-        mixins.UpdateModelMixin,
-        mixins.DestroyModelMixin,
-        mixins.RetrieveModelMixin,
-        generics.GenericAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    lookup_field = 'pk'
-
-    def get(self, request, *args, **kwargs):
-        print(args, kwargs)
-        pk = kwargs.get('pk')
-        if pk is not None:
-            return self.retrieve(request, *args, **kwargs)
-        return self.list(request, *args, **kwargs)
-
-        # Even said you wanna stay, I can't stay if the 3rd person appears,
-        # it feels like you're stabbing me indirectly (?).
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+from .permissions import IsStaffEditorPermission
 
 
-product_mixin_view = ProductMixinView.as_view()
+# class ProductMixinView(
+#         mixins.CreateModelMixin,
+#         mixins.ListModelMixin,
+#         mixins.UpdateModelMixin,
+#         mixins.DestroyModelMixin,
+#         mixins.RetrieveModelMixin,
+#         generics.GenericAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     lookup_field = 'pk'
+
+#     def get(self, request, *args, **kwargs):
+#         print(args, kwargs)
+#         pk = kwargs.get('pk')
+#         if pk is not None:
+#             return self.retrieve(request, *args, **kwargs)
+#         return self.list(request, *args, **kwargs)
+
+#         # Even said you wanna stay, I can't stay if the 3rd person appears,
+#         # it feels like you're stabbing me indirectly (?).
+
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
+
+#     def put(self, request, *args, **kwargs):
+#         return self.update(request, *args, **kwargs)
+
+#     def delete(self, request, *args, **kwargs):
+#         return self.destroy(request, *args, **kwargs)
+
+
+# product_mixin_view = ProductMixinView.as_view()
 
 
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
@@ -70,6 +74,8 @@ product_detail_view = ProductDetailAPIView.as_view()
 class ProductUpdateAPIView(generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [permissions.DjangoModelPermissions]
+
     lookup_field = 'pk'
 
     def perform_update(self, serializer):
