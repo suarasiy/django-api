@@ -26,9 +26,25 @@
       </tbody>
     </table>
     <br>
-    <p><strong>Result:</strong></p>
-    <div id="content-container"></div>
   </form>
+  <form id="search-form" method="GET">
+    <table>
+      <thead></thead>
+      <tbody>
+        <tr>
+          <td><label for="search">Search</label></td>
+          <td><input type="search" name="q" id="search" placeholder="Search" autocomplete="off"></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <input type="submit" value="Search" style="width: 100%">
+          </td>
+      </tbody>
+    </table>
+    <br>
+  </form>
+  <p><strong>Result:</strong></p>
+  <div id="content-container"></div>
   <script src="./client.js"></script>
 </body>
 </html>
